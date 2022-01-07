@@ -1,0 +1,26 @@
+{
+  "name": "@iyio/convo",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/convo-index.js",
+  "types": "dist/convo-index.d.ts",
+  "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc",
+    "build-publish": "npm run build && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "directory": "lib/",
+    "url": "https://github.com/iyioio/convo.git"
+  },
+  "keywords": [],
+  "author": "Scott Vance",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@iyio/named-events": "^1.0.0"
+  }
+}

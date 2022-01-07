@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@react-native-firebase/app": ["peer-deps/node_modules/@react-native-firebase/app"],
+      "@react-native-firebase/firestore": ["peer-deps/node_modules/@react-native-firebase/firestore"]
+    }
+  }
+}

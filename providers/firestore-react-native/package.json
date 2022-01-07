@@ -1,0 +1,30 @@
+{
+  "name": "@iyio/convo-firestore-react-native",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/convo-firestore-react-native-index.js",
+  "types": "dist/convo-firestore-react-native-index.d.ts",
+  "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc",
+    "build-publish": "npm run build && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "directory": "providers/firestore-react-native/",
+    "url": "https://github.com/iyioio/convo.git"
+  },
+  "keywords": [],
+  "author": "Scott Vance",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  },
+  "peerDependencies": {
+    "@react-native-firebase/firestore": "^12.0.0",
+    "@react-native-firebase/app": "^12.0.0"
+  },
+  "dependencies": {
+    "@iyio/convo": "0.0.1"
+  }
+}
