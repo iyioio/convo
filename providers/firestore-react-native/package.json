@@ -25,6 +25,7 @@
     "@react-native-firebase/app": "^12.0.0"
   },
   "dependencies": {
-    "@iyio/convo": "0.0.1"
+    "@iyio/convo": "0.0.1",
+    "@iyio/named-events": "^1.3.0"
   }
 }
