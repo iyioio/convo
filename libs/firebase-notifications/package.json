@@ -1,0 +1,23 @@
+{
+  "name": "@iyio/convo-firebase-notifications",
+  "version": "0.0.1",
+  "description": "Sends notifications for firestore conversations",
+  "main": "dist/@iyio/convo-firebase-notifications-index.js",
+  "types": "dist/@iyio/convo-firebase-notifications-index.d.ts",
+  "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc",
+    "build-publish": "npm run build && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "directory": "convo-firebase-notifications/",
+    "url": "https://github.com/iyioio/convo.git"
+  },
+  "keywords": [],
+  "author": "Scott Vance",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  }
+}
