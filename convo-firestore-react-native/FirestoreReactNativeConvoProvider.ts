@@ -1,6 +1,6 @@
-import { Convo, ConvoInfo, ConvoNoId, ConvoProvider, ConvoUserId, DateTimeValue, Message, MessageListPointer, MessageNoId } from '@iyio/convo';
 import { createEvent } from '@iyio/named-events';
 import firestore from '@react-native-firebase/firestore';
+import { Convo, ConvoInfo, ConvoNoId, ConvoProvider, ConvoUserId, DateTimeValue, Message, MessageListPointer, MessageNoId } from 'convo/dist/convo-index';
 import { cloneObjSkipUndefined, newId, syncSnapshot } from './util';
 
 const getConfig:any={source:'server'}

@@ -1,6 +1,7 @@
 {
     "packages":[
-        {"path":"lib"},
-        {"path":"providers/firestore-react-native"}
+        {"path":"convo"},
+        {"path":"convo-firebase-notifications"},
+        {"path":"convo-firestore-react-native"}
     ]
 }
