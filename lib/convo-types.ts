@@ -175,3 +175,24 @@ export interface SendMessageRequest
     contentUri?:string;
 
 }
+
+export interface NotificationDevice
+{
+    uid:string;
+
+    id?:string;
+
+    type:string;
+
+    deviceId:string;
+
+    created?:number;
+
+    data?:string;
+
+    userId?:ConvoUserId;
+
+    isPrimary?:boolean;
+
+    name?:string;
+}
