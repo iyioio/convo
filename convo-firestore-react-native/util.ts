@@ -1,3 +1,5 @@
+import { ItemPointer, ListPointer } from '@iyio/convo';
+import { createEvent } from '@iyio/named-events';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
 /**
@@ -49,6 +51,7 @@ export const cloneObjSkipUndefined=<T>(obj:T, maxDepth=20):T=>
 
 }
 
+
 export function syncSnapshot<T>(
     query:FirebaseFirestoreTypes.Query<T>,
     ary:T[],
@@ -93,4 +96,151 @@ export function syncSnapshot<T>(
     },()=>{
         firstSnap=true;
     });
+}
+
+export interface CreateListPointerOptions<T>
+{
+    buildQuery:(start:T|null,limit:number)=>FirebaseFirestoreTypes.Query<FirebaseFirestoreTypes.DocumentData>;
+    defaultLimit?:number;
+    defaultStart?:T|null;
+}
+
+export function createListPointer<T>({
+    buildQuery,
+    defaultLimit=100,
+    defaultStart=null,
+}:CreateListPointerOptions<T>):ListPointer<T>{
+    
+    const list:T[]=[];
+
+    let limit=defaultLimit;
+    let start:T|null=defaultStart;
+    let disposed=false;
+
+    const setStart=(v:T|null)=>{
+        if(v===start){
+            return;
+        }
+        start=v;
+        update();
+    }
+
+    const setLimit=(v:number)=>{
+        if(v<0){
+            v=0;
+        }
+        if(v===limit){
+            return;
+        }
+        limit=v;
+        update();
+
+    }
+
+    const dispose=()=>{
+        disposed=true;
+        update();
+    }
+
+    const onListChanged=createEvent();
+
+
+    const pointer={
+        list,
+        getStart:()=>start,
+        setStart,
+        getLimit:()=>limit,
+        setLimit,
+        onListChanged:onListChanged.evt,
+        dispose,
+        changeCount:0
+    }
+
+    let releaseSnap:(()=>void)|null=null;
+    let updateId=0;
+    const update=()=>{
+
+        const id=++updateId;
+
+        releaseSnap?.();
+        releaseSnap=null;
+        if(disposed){
+            return;
+        }
+
+        const query=buildQuery(start,limit)
+
+        releaseSnap=syncSnapshot(
+            query,
+            list,
+            ()=>id===updateId,
+            ()=>{
+                (pointer as any).changeCount++;
+                onListChanged.trigger()
+            });
+            
+    }
+
+    update();
+
+    return pointer;
+}
+
+
+export interface CreateItemPointerOptions<T>
+{
+    buildQuery:()=>FirebaseFirestoreTypes.DocumentReference<FirebaseFirestoreTypes.DocumentData>;
+}
+
+export function createItemPointer<T>({
+    buildQuery,
+}:CreateItemPointerOptions<T>):ItemPointer<T>{
+    
+    let disposed=false;
+
+    const dispose=()=>{
+        disposed=true;
+        update();
+    }
+    const onItemChanged=createEvent();
+
+    const pointer:ItemPointer<T>={
+        item:null,
+        onItemChanged:onItemChanged.evt,
+        dispose,
+        changeCount:0
+    }
+
+
+    let releaseSnap:(()=>void)|null=null;
+    let updateId=0;
+    const update=()=>{
+
+        const id=++updateId;
+
+        releaseSnap?.();
+        releaseSnap=null;
+        if(disposed){
+            return;
+        }
+
+        const query=buildQuery()
+
+        releaseSnap=query.onSnapshot((snap)=>{
+            if(id!==updateId || !snap){
+                return;
+            }
+            if(snap.exists){
+                (pointer as any).item=snap.data();
+            }else{
+                (pointer as any).item=null;
+            }
+            (pointer as any).changeCount++;
+            onItemChanged.trigger();
+        })  
+    }
+
+    update();
+
+    return pointer;
 }

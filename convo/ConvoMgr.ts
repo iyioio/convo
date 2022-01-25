@@ -1,5 +1,5 @@
 import { ConvoNoId, ConvoProvider, MessageNoId } from "./convo-provider-types";
-import { Convo, ConvoInfo, ConvoUserId, DateTimeValue, Message, MessageListPointer, SendMessageRequest, StartConvoRequest } from "./convo-types";
+import { Convo, ConvoInfo, DateTimeValue, ItemPointer, ListPointer, Member, Message, SendMessageRequest, StartConvoRequest } from "./convo-types";
 
 export class ConvoMgr
 {
@@ -11,7 +11,7 @@ export class ConvoMgr
         this.provider=provider;
     }
 
-    public async getConversationsAsync(userId:ConvoUserId): Promise<ConvoInfo[]>
+    public async getConversationsAsync(userId:string): Promise<ConvoInfo[]>
     {
         return await this.provider.getConversationsAsync(userId);
     }
@@ -21,9 +21,24 @@ export class ConvoMgr
         return await this.provider.getConversationAsync(convoId);
     }
 
-    public getMessageListPointer(convoId:string, userId:ConvoUserId): MessageListPointer
+    public getMessageListPointer(convoId:string, userId:string): ListPointer<Message>
     {
         return this.provider.getMessageListPointer(convoId,userId);
+    }
+
+    public getConversationListPointer(userId:string): ListPointer<Convo>
+    {
+        return this.provider.getConversationListPointer(userId);
+    }
+
+    public getConversationPointer(convoId:string, userId:string): ItemPointer<Convo>
+    {
+        return this.provider.getConversationPointer(convoId,userId);
+    }
+
+    public getKnownMembersAsync(userId:string): Promise<Member[]>
+    {
+        return this.provider.getKnownMembersAsync(userId);
     }
 
     /**
@@ -47,15 +62,19 @@ export class ConvoMgr
 
         const now=Date.now();
 
-        let convoNoId:ConvoNoId={
+        const memberIds=request.memberIds?
+            [...request.memberIds]:
+            [...members.map(m=>m.id),...(request.additionalmemberIds||[])];
+
+        memberIds.sort((a,b)=>a.localeCompare(b));
+
+        const convoNoId:ConvoNoId={
             name:request.name||'',
             creatorId:members.find(m=>m.isCreator)?.id,
             lastChanged:now,
             created:now,
             members,
-            memberIds:request.memberIds?
-                [...request.memberIds]:
-                [...members.map(m=>m.id),...(request.additionalmemberIds||[])]
+            memberIds
         }
         
         return await this.provider.startConversationAsync(convoNoId,request.name?false:true);
@@ -70,16 +89,75 @@ export class ConvoMgr
             throw new Error('SendMessageRequest must define a convoId')
         }
 
+        let notify=request.notify?[...request.notify]:[];
+
+        if(request.senderId){
+            if(request.notifySender){
+                if(!notify.includes(request.senderId)){
+                    notify.push(request.senderId);
+                }
+            }else{
+                if(notify.includes(request.senderId)){
+                    notify=notify.filter(id=>id!==request.senderId);
+                }
+            }
+        }
+
+        const read:{[memberId:string]:boolean}={}
+        for(const n of notify){
+            read[n]=false;
+        }
+
+
         const messageNoId:MessageNoId={
             convoId:request.convoId,
             senderId:request.senderId,
+            senderName:request.senderName,
             created:request.created===undefined?Date.now():request.created,
             text:request.text,
             contentType:request.contentType,
             content:request.content,
             contentUri:request.contentUri,
-
+            notify:notify,
+            read
         };
         return await this.provider.sendMessageAsync(messageNoId);
+    }
+
+    public async getConversationForMembersAsync(memberIds:string[],primaryUserId?:string): Promise<Convo|null>
+    {
+        if(!memberIds?.length){
+            return null;
+        }
+        memberIds=[...memberIds];
+        memberIds.sort((a,b)=>a.localeCompare(b));
+        return await this.provider.getConversationForMembersAsync(
+            primaryUserId && !memberIds.includes(primaryUserId)?
+                [primaryUserId,...memberIds]:memberIds);
+    }
+
+    public async markMessageAsReadAsync(convoId:string, messageId:string, userId:string): Promise<void>
+    {
+        await this.provider.markMessageAsReadAsync(convoId,messageId,userId);
+    }
+
+    public async markMessagesForUserReadAsync(messages:Message[], userId:string): Promise<void>
+    {
+        const unread:Message[]=[];
+        for(const m of messages){
+            if(m.read?.[userId]===false){
+                unread.push(m);
+            }
+        }
+        if(!unread.length){
+            return;
+        }
+
+        await Promise.all(unread.map(m=>this.provider.markMessageAsReadAsync(m.convoId,m.id,userId)));
+    }
+
+    public getUnreadMessagesPointer(userId:string): ListPointer<Message>
+    {
+        return this.provider.getUnreadMessagesPointer(userId);
     }
 }

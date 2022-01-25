@@ -1,7 +1,0 @@
-{
-    "packages":[
-        {"path":"convo"},
-        {"path":"convo-firebase-notifications"},
-        {"path":"convo-firestore-react-native"}
-    ]
-}

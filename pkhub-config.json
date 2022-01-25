@@ -1,0 +1,21 @@
+{
+    "packages":[
+        {"path":"convo"},
+        {"path":"convo-firebase-notifications"},
+        {"path":"convo-firestore-react-native"},
+        {"path":"convo-react"}
+    ],
+
+    "scopes":[
+        {
+            "targets":[
+                "convo-firestore-react-native",
+                "convo-firebase-notifications",
+                "convo-react"
+            ],
+            "use":[
+                "@iyio/convo"
+            ]
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-import type { Convo, ConvoInfo, ConvoUserId, DateTimeValue, Message, MessageListPointer } from "./convo-types";
+import type { Convo, ConvoInfo, DateTimeValue, ItemPointer, ListPointer, Member, Message } from "./convo-types";
 
 
 export type ConvoNoId=Omit<Convo,'id'>;
@@ -19,7 +19,7 @@ export interface ConvoProvider
      * Returns basic info for all conversations for a user
      * @param userId Id of the user to return conversations for
      */
-    getConversationsAsync(userId:ConvoUserId): Promise<ConvoInfo[]>;
+    getConversationsAsync(userId:string): Promise<ConvoInfo[]>;
 
     /**
      * Returns messages for the given convo
@@ -43,5 +43,36 @@ export interface ConvoProvider
     /**
      * Returns a message list pointer that is updated in realtime
      */
-    getMessageListPointer(convoId:string, userId:ConvoUserId): MessageListPointer;
+    getMessageListPointer(convoId:string, userId:string): ListPointer<Message>;
+
+
+    /**
+     * Returns a conversation list pointer that is updated in realtime
+     */
+    getConversationListPointer(userId:string): ListPointer<Convo>;
+
+    /**
+     * Returns a pointer to a conversation that is updated in realtime
+     */
+    getConversationPointer(convoId:string, userId:string): ItemPointer<Convo>;
+
+    /**
+     * Returns a list of members that the user has conversed with.
+     */
+    getKnownMembersAsync(userId:string): Promise<Member[]>;
+
+    /**
+     * Returns a conversation with matching members
+     */
+    getConversationForMembersAsync(memberIds:string[]): Promise<Convo|null>;
+
+    /**
+     * Marks a message read for a given message and user
+     */
+    markMessageAsReadAsync(convoId:string, messageId:string, userId:string): Promise<void>;
+
+    /**
+     * Returns a list pointer to all unread messages of the user
+     */
+    getUnreadMessagesPointer(userId:string): ListPointer<Message>;
 }

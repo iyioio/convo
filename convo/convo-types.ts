@@ -2,8 +2,6 @@ import { NamedEvent } from "@iyio/named-events";
 
 export type DateTimeValue=number;
 
-export type ConvoUserId=string;
-
 export interface Convo
 {
     id:string;
@@ -14,12 +12,12 @@ export interface Convo
 
     created:DateTimeValue;
 
-    lastChangedUserId?:ConvoUserId;
+    lastChangedUserId?:string;
 
     /**
      * Id of the user that started the conversation
      */
-    creatorId?:ConvoUserId;
+    creatorId?:string;
 
     /**
      * Members of the conversation
@@ -29,7 +27,12 @@ export interface Convo
     /**
      * user ids of the members that have access to the conversation.
      */
-    memberIds:ConvoUserId[];
+    memberIds:string[];
+
+    /**
+     * The last message of the conversation
+     */
+    lastMessage?:Message;
 }
 
 export interface ConvoInfo
@@ -42,7 +45,7 @@ export interface ConvoInfo
 
     lastChanged:DateTimeValue;
 
-    lastChangedUserId?:ConvoUserId;
+    lastChangedUserId?:string;
 }
 
 export interface StartConvoRequest
@@ -61,18 +64,18 @@ export interface StartConvoRequest
     /**
      * Additional userIds to grant access to the created conversation
      */
-    additionalmemberIds?:ConvoUserId[];
+    additionalmemberIds?:string[];
 
     /**
      * If defined memberIds will overwrite the userIds of members and additionalmemberIds
      */
-    memberIds?:ConvoUserId[]
+    memberIds?:string[]
 
 }
 
 export interface Member
 {
-    id:ConvoUserId;
+    id:string;
 
     name?:string;
 
@@ -89,7 +92,9 @@ export interface Message
 
     convoId:string;
 
-    senderId?:ConvoUserId;
+    senderId?:string;
+
+    senderName?:string;
 
     created:DateTimeValue;
 
@@ -101,60 +106,15 @@ export interface Message
 
     contentUri?:string;
 
-}
-
-/**
- * Represents a dynamic view of a segment of a list of messages
- */
-export interface MessageListPointer
-{
+    /**
+     * Array of user ids of users to notify of the message
+     */
+    notify?:string[];
 
     /**
-     * Id of the convo the message list is pointed at.
+     * A lookup of users that have read the message
      */
-    readonly convoId:string;
-
-    /**
-     * Id of the user the message list is relative to.
-     */
-    readonly userId?:ConvoUserId;
-
-    /**
-     * Current view of the message list
-     */
-    readonly messages:Message[];
-
-    /**
-     * Occurs when the messages array changes
-     */
-    onMessagesChanged:NamedEvent;
-
-    /**
-     * Gets the starting message of the list.
-     */
-    getStart():Message|null;
-
-    /**
-     * Sets the starting message of the list. The start message can be used to view messages
-     * further back in the history of a conversation.
-     */
-    setStart(message:Message|null):void;
-
-    /**
-     * Gets the current limit
-     */
-    getLimit():number;
-
-    /**
-     * Sets the max number of messages in the list.
-     */
-    setLimit(limit:number):void;
-
-
-    /**
-     * Disposes of the message list and releases all related resources
-     */
-    dispose():void;
+    read?:{[memberId:string]:boolean}
 
 }
 
@@ -162,7 +122,9 @@ export interface SendMessageRequest
 {
     convoId:string;
 
-    senderId?:ConvoUserId;
+    senderId?:string;
+
+    senderName?:string;
 
     created?:DateTimeValue;
 
@@ -173,6 +135,13 @@ export interface SendMessageRequest
     content?:string;
 
     contentUri?:string;
+
+    /**
+     * Array of user ids of users to notify of the message
+     */
+    notify?:string[];
+
+    notifySender?:boolean;
 
 }
 
@@ -190,9 +159,86 @@ export interface NotificationDevice
 
     data?:string;
 
-    userId?:ConvoUserId;
+    userId?:string;
 
     isPrimary?:boolean;
 
     name?:string;
+}
+
+/**
+ * Represents a dynamic view of a item that is updated in realtime
+ */
+export interface ItemPointer<T>
+{
+    /**
+     * Current view of the list
+     */
+    readonly item:T|null;
+
+    /**
+     * Occurs when the list changes
+     */
+    onItemChanged:NamedEvent;
+
+    /**
+     * The number of changes that have occurred
+     */
+    readonly changeCount:number;
+
+
+    /**
+     * Disposes of the list and releases all related resources
+     */
+    dispose():void;
+}
+
+/**
+ * Represents a dynamic view of a segment of a list of objects update in realtime
+ */
+export interface ListPointer<T>
+{
+
+    /**
+     * Current view of the list
+     */
+    readonly list:T[];
+
+    /**
+     * Occurs when the list changes
+     */
+    onListChanged:NamedEvent;
+
+    /**
+     * The number of changes that have occurred
+     */
+    readonly changeCount:number;
+
+    /**
+     * Gets the starting item of the list
+     */
+    getStart():T|null;
+
+    /**
+     * Sets the starting item of the list. The starting item can be used to view item
+     * further back in the history
+     */
+    setStart(item:T|null):void;
+
+    /**
+     * Gets the current limit
+     */
+    getLimit():number;
+
+    /**
+     * Sets the max number of items in the list.
+     */
+    setLimit(limit:number):void;
+
+
+    /**
+     * Disposes of the list and releases all related resources
+     */
+    dispose():void;
+
 }
