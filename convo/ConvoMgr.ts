@@ -11,9 +11,9 @@ export class ConvoMgr
         this.provider=provider;
     }
 
-    public async getConversationsAsync(userId:string): Promise<ConvoInfo[]>
+    public async getConversationsAsync(userId:string, tags?:string[]): Promise<ConvoInfo[]>
     {
-        return await this.provider.getConversationsAsync(userId);
+        return await this.provider.getConversationsAsync(userId,tags||null);
     }
 
     public async getConversationAsync(convoId:string): Promise<Convo|null>
@@ -26,9 +26,9 @@ export class ConvoMgr
         return this.provider.getMessageListPointer(convoId,userId);
     }
 
-    public getConversationListPointer(userId:string): ListPointer<Convo>
+    public getConversationListPointer(userId:string, tags?:string[]): ListPointer<Convo>
     {
-        return this.provider.getConversationListPointer(userId);
+        return this.provider.getConversationListPointer(userId,tags||null);
     }
 
     public getConversationPointer(convoId:string, userId:string): ItemPointer<Convo>
@@ -74,7 +74,8 @@ export class ConvoMgr
             lastChanged:now,
             created:now,
             members,
-            memberIds
+            memberIds,
+            tags:request.tags
         }
         
         return await this.provider.startConversationAsync(convoNoId,request.name?false:true);
@@ -113,12 +114,17 @@ export class ConvoMgr
             convoId:request.convoId,
             senderId:request.senderId,
             senderName:request.senderName,
+            receiverId:request.receiverId,
+            includeServices:request.includeServices,
             created:request.created===undefined?Date.now():request.created,
             text:request.text,
             contentType:request.contentType,
             content:request.content,
             contentUri:request.contentUri,
+            contentThumbnailUrl:request.contentThumbnailUrl,
+            contentData:request.contentData,
             notify:notify,
+            tags:request.tags,
             read
         };
         return await this.provider.sendMessageAsync(messageNoId);

@@ -43,10 +43,16 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
     }
 
 
-    public async getConversationsAsync(userId:string): Promise<ConvoInfo[]>
+    public async getConversationsAsync(userId:string, tags:string[]|null): Promise<ConvoInfo[]>
     {
-        return (await this.conversations
-            .where('memberIds','array-contains',userId)
+        let query=this.conversations
+            .where('memberIds','array-contains',userId);
+
+        if(tags){
+            query=query.where('tags','array-contains-any',tags);
+        }
+
+        return (await query
             .orderBy('lastChanged','desc')
             .get())
             .docs.map(d=>d.data() as ConvoInfo);
@@ -125,13 +131,18 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
         });
     }
 
-    public getConversationListPointer(userId:string): ListPointer<Convo>
+    public getConversationListPointer(userId:string, tags:string[]|null): ListPointer<Convo>
     {
         return createListPointer<Convo>({
             buildQuery:(start,limit)=>{
                 let query=this.conversations
-                    .where('memberIds','array-contains',userId)
-                    .orderBy('lastChanged','desc');
+                    .where('memberIds','array-contains',userId);
+
+                if(tags){
+                    query=query.where('tags','array-contains-any',tags);
+                }
+
+                query=query.orderBy('lastChanged','desc');
 
                 if(start){
                     query=query.startAt(start.created);

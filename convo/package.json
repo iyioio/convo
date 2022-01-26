@@ -21,6 +21,6 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "@iyio/named-events": "^1.3.0"
+    "@iyio/named-events": "^1.5.0"
   }
 }

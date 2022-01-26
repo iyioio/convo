@@ -33,6 +33,8 @@ export interface Convo
      * The last message of the conversation
      */
     lastMessage?:Message;
+
+    tags?:string[];
 }
 
 export interface ConvoInfo
@@ -69,7 +71,9 @@ export interface StartConvoRequest
     /**
      * If defined memberIds will overwrite the userIds of members and additionalmemberIds
      */
-    memberIds?:string[]
+    memberIds?:string[];
+
+    tags?:string[];
 
 }
 
@@ -79,12 +83,25 @@ export interface Member
 
     name?:string;
 
+    /**
+     * A service that manages the member. For example the service could be a identifier for a bot
+     */
+    service?:string;
+
     isCreator?:boolean;
 
+    isActive?:boolean;
+
+    isMonitor?:boolean;
+
+    isViewOnly?:boolean;
+
     roles?:string[];
+
+    tags?:string[];
 }
 
-export type ContentType='image'|'video'|'lottie';
+export type ContentType='image'|'video'|'lottie'|'other';
 
 export interface Message
 {
@@ -93,6 +110,18 @@ export interface Message
     convoId:string;
 
     senderId?:string;
+
+    /**
+     * Id of the intended receiver of the message. If not set the receiver is intended to be anybody
+     * in the conversation
+     */
+    receiverId?:string;
+
+    /**
+     * If true messages should included in service processing. For example the message could be
+     * sent to a bot.
+     */
+    includeServices?:boolean;
 
     senderName?:string;
 
@@ -106,6 +135,10 @@ export interface Message
 
     contentUri?:string;
 
+    contentThumbnailUrl?:string;
+
+    contentData?:any;
+
     /**
      * Array of user ids of users to notify of the message
      */
@@ -116,6 +149,8 @@ export interface Message
      */
     read?:{[memberId:string]:boolean}
 
+    tags?:string[];
+
 }
 
 export interface SendMessageRequest
@@ -123,6 +158,10 @@ export interface SendMessageRequest
     convoId:string;
 
     senderId?:string;
+
+    receiverId?:string;
+    
+    includeServices?:boolean;
 
     senderName?:string;
 
@@ -136,12 +175,18 @@ export interface SendMessageRequest
 
     contentUri?:string;
 
+    contentThumbnailUrl?:string;
+
+    contentData?:any;
+
     /**
      * Array of user ids of users to notify of the message
      */
     notify?:string[];
 
     notifySender?:boolean;
+
+    tags?:string[];
 
 }
 
@@ -164,6 +209,8 @@ export interface NotificationDevice
     isPrimary?:boolean;
 
     name?:string;
+
+    tags?:string[];
 }
 
 /**

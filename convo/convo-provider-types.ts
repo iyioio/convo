@@ -19,7 +19,7 @@ export interface ConvoProvider
      * Returns basic info for all conversations for a user
      * @param userId Id of the user to return conversations for
      */
-    getConversationsAsync(userId:string): Promise<ConvoInfo[]>;
+    getConversationsAsync(userId:string, tags:string[]|null): Promise<ConvoInfo[]>;
 
     /**
      * Returns messages for the given convo
@@ -49,7 +49,7 @@ export interface ConvoProvider
     /**
      * Returns a conversation list pointer that is updated in realtime
      */
-    getConversationListPointer(userId:string): ListPointer<Convo>;
+    getConversationListPointer(userId:string, tags:string[]|null): ListPointer<Convo>;
 
     /**
      * Returns a pointer to a conversation that is updated in realtime
