@@ -12,6 +12,7 @@ export interface SendConvoNotificationsOptions
     devicesCollection?:string;
     getData?:(message:Message,device:NotificationDevice)=>{[key:string]:string},
     configureMessage?:(msg:messaging.TokenMessage)=>void;
+    resolveUriAsync?:(uri:string,message:Message,device:NotificationDevice)=>Promise<string|null>;
 }
 
 export function sendConvoNotifications(
@@ -20,7 +21,8 @@ export function sendConvoNotifications(
         messageDocumentPath=defaultMessageDocumentPath,
         devicesCollection=defaultDevicesCollection,
         getData,
-        configureMessage
+        configureMessage,
+        resolveUriAsync
     }:SendConvoNotificationsOptions)
 {
     return functions.firestore
@@ -29,7 +31,7 @@ export function sendConvoNotifications(
 
             const message=snap.data() as Message;
 
-            if(message.notify?.length && message.text){
+            if(message.notify?.length && (message.text || message.contentThumbnailUrl)){
 
                 const devices=await db.collection(devicesCollection)
                     .where('userId','in',message.notify)
@@ -52,11 +54,18 @@ export function sendConvoNotifications(
                         sentTo[device.deviceId]=true;
 
                         if(device.deviceId){
+                            
+                            let uri=message.contentThumbnailUrl;
+                            if(uri && resolveUriAsync){
+                                uri=(await resolveUriAsync(uri,message,device))||undefined;
+                            }
+
                             const msg:messaging.TokenMessage={
                                 token:device.deviceId,
                                 notification:{
                                     title:message.senderName?`Message from ${message.senderName}`:'New Message',
-                                    body:message.text
+                                    body:message.text,
+                                    imageUrl:uri
                                 }
                             }
                             const data=getData?.(message,device);
