@@ -136,10 +136,11 @@ export class ConvoMgr
             return null;
         }
         memberIds=[...memberIds];
+        if(primaryUserId && !memberIds.includes(primaryUserId)){
+            memberIds.push(primaryUserId);
+        }
         memberIds.sort((a,b)=>a.localeCompare(b));
-        return await this.provider.getConversationForMembersAsync(
-            primaryUserId && !memberIds.includes(primaryUserId)?
-                [primaryUserId,...memberIds]:memberIds);
+        return await this.provider.getConversationForMembersAsync(memberIds);
     }
 
     public async markMessageAsReadAsync(convoId:string, messageId:string, userId:string): Promise<void>
