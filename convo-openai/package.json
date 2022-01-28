@@ -1,0 +1,23 @@
+{
+  "name": "@iyio/convo-openai",
+  "version": "0.0.1",
+  "description": "A Convo bot service using OpenAI GTP-3",
+  "main": "dist/convo-openai-index.js",
+  "types": "dist/convo-openai-index.d.ts",
+  "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc",
+    "build-publish": "npm run build && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "directory": "convo-openai/",
+    "url": "https://github.com/iyioio/convo.git"
+  },
+  "keywords": [],
+  "author": "Scott Vance",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  }
+}

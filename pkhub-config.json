@@ -3,7 +3,8 @@
         {"path":"convo"},
         {"path":"convo-firebase-notifications"},
         {"path":"convo-firestore-react-native"},
-        {"path":"convo-react"}
+        {"path":"convo-react"},
+        {"path":"convo-openai"}
     ],
 
     "scopes":[
