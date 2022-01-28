@@ -150,6 +150,8 @@ export interface Message
     read?:{[memberId:string]:boolean}
 
     tags?:string[];
+    
+    data?:{[key:string]:string}
 
 }
 
@@ -187,6 +189,8 @@ export interface SendMessageRequest
     notifySender?:boolean;
 
     tags?:string[];
+
+    data?:{[key:string]:string}
 
 }
 

@@ -140,6 +140,7 @@ export class ConvoMgr
             contentData:request.contentData,
             notify:notify,
             tags:sortTags(request.tags),
+            data:request.data?{...request.data}:undefined,
             read
         };
         return await this.provider.sendMessageAsync(messageNoId);
@@ -163,7 +164,7 @@ export class ConvoMgr
         await this.provider.markMessageAsReadAsync(convoId,messageId,userId);
     }
 
-    public async markMessagesForUserReadAsync(messages:Message[], userId:string): Promise<void>
+    public async markMessagesForUserReadAsync(messages:Message[], userId:string): Promise<number>
     {
         const unread:Message[]=[];
         for(const m of messages){
@@ -172,14 +173,21 @@ export class ConvoMgr
             }
         }
         if(!unread.length){
-            return;
+            return 0;
         }
 
         await Promise.all(unread.map(m=>this.provider.markMessageAsReadAsync(m.convoId,m.id,userId)));
+
+        return unread.length;
     }
 
     public getUnreadMessagesPointer(userId:string): ListPointer<Message>
     {
         return this.provider.getUnreadMessagesPointer(userId);
+    }
+
+    public getUnreadMessageCountAsync(userId:string): Promise<number>
+    {
+        return this.provider.getUnreadMessageCountAsync(userId);
     }
 }

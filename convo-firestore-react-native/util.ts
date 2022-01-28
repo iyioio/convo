@@ -244,3 +244,36 @@ export function createItemPointer<T>({
 
     return pointer;
 }
+
+export async function getQueryCountAsync(
+    idProp:string,
+    query:FirebaseFirestoreTypes.Query<FirebaseFirestoreTypes.DocumentData>,
+    maxChunks:number=3,
+    chunkCount:number=100)
+    :Promise<number>
+{
+    query=query.orderBy(idProp);
+
+    let count=0;
+    let first=true;
+    let lastId:any='';
+    
+    for(let c=0;c<maxChunks;c++){
+        const q=(first?query:query.startAfter(lastId)).limit(chunkCount);
+        first=false;
+
+        const docs=await q.get();
+        if(!docs.size){
+            break;
+        }
+        count+=docs.size;
+        const last=docs.docs[docs.size-1].data();
+        lastId=last[idProp];
+
+        if(docs.size<chunkCount){
+            break;
+        }
+    }
+
+    return count;
+}

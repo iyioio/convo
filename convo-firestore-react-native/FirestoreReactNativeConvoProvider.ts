@@ -1,7 +1,7 @@
 import { ItemPointer, ListPointer, Member } from '@iyio/convo';
 import firestore from '@react-native-firebase/firestore';
 import { Convo, ConvoInfo, ConvoNoId, ConvoProvider, DateTimeValue, Message, MessageNoId } from 'convo/dist/convo-index';
-import { cloneObjSkipUndefined, createItemPointer, createListPointer, newId } from './util';
+import { cloneObjSkipUndefined, createItemPointer, createListPointer, getQueryCountAsync, newId } from './util';
 
 export const defaultConvoCollection='conversations'
 
@@ -227,5 +227,15 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
                 return query.limit(limit);
             }
         });
+    }
+
+    public async getUnreadMessageCountAsync(userId:string): Promise<number>
+    {
+        return await getQueryCountAsync(
+            'id',
+            this.db.collectionGroup('messages')
+                .where('notify','array-contains',userId)
+                .where(`read.${userId}`,'==',false));
+            
     }
 }

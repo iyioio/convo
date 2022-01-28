@@ -72,6 +72,14 @@ export function sendConvoNotifications(
                             if(data){
                                 msg.data=data;
                             }
+                            if(message.data){
+                                if(!msg.data){
+                                    msg.data={}
+                                }
+                                for(const e in message.data){
+                                    msg.data[e]=message.data[e];
+                                }
+                            }
                             configureMessage?.(msg);
                             await firebase.messaging().send(msg);
                         }

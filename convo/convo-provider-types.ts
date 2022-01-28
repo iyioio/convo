@@ -75,4 +75,9 @@ export interface ConvoProvider
      * Returns a list pointer to all unread messages of the user
      */
     getUnreadMessagesPointer(userId:string): ListPointer<Message>;
+
+    /**
+     * Returns the number of unread messages for a user
+     */
+    getUnreadMessageCountAsync(userId:string): Promise<number>;
 }
