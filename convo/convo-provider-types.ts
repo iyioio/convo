@@ -64,7 +64,7 @@ export interface ConvoProvider
     /**
      * Returns a conversation with matching members
      */
-    getConversationForMembersAsync(memberIds:string[]): Promise<Convo|null>;
+    getConversationForMembersAsync(memberIds:string[],tags:string[]|null): Promise<Convo|null>;
 
     /**
      * Marks a message read for a given message and user

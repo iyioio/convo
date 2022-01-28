@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 
 export function useConversationList(
     mgr:ConvoMgr|null|undefined,
-    userId:string|null|undefined)
+    userId:string|null|undefined,
+    tags?:string[]|null)
 {
+    tags=useTagList(tags);
     const [,render]=useState(0)
     const [pointer,setPointer]=useState<ListPointer<Convo>|null>();
     useEffect(()=>{
@@ -12,7 +14,7 @@ export function useConversationList(
             setPointer(null);
             return;
         }
-        const pointer=mgr.getConversationListPointer(userId);
+        const pointer=mgr.getConversationListPointer(userId,tags||undefined);
         setPointer(pointer);
         pointer.onListChanged(()=>{
             render(v=>v+1);
@@ -20,7 +22,7 @@ export function useConversationList(
         return ()=>{
             pointer.dispose();
         }
-    },[mgr,userId]);
+    },[mgr,userId,tags]);
 
     return pointer;
 }
@@ -125,9 +127,12 @@ export function useKnownConvoMembers(
 export function useConversationForMembers(
     mgr:ConvoMgr|null|undefined,
     memberIds:string[]|null|undefined,
-    additionalUserId?:string|null)
+    additionalUserId?:string|null,
+    tags?:string[])
 {
     const [convo,setConvo]=useState<Convo|null>(null);
+
+    tags=useTagList(tags);
 
     useEffect(()=>{
         if(!mgr || !memberIds?.length){
@@ -135,13 +140,45 @@ export function useConversationForMembers(
         }
         let m=true;
         (async ()=>{
-            const convo=await mgr.getConversationForMembersAsync(memberIds,additionalUserId||undefined);
+            const convo=await mgr.getConversationForMembersAsync(memberIds,additionalUserId||undefined,tags||undefined);
             if(m){
                 setConvo(convo);
             }
         })()
         return ()=>{m=false};
-    },[mgr,memberIds,additionalUserId]);
+    },[mgr,memberIds,additionalUserId,tags]);
 
     return convo;
+}
+
+/**
+ * Returns a merged copy of the tags.
+ */
+export function useTagList(tags:string[]|null|undefined):string[]|undefined
+{
+    tags=tags?[...tags]:undefined;
+    tags?.sort((a,b)=>a.localeCompare(b));
+    const [tagCopy,setTagCopy]=useState(tags||undefined);
+
+    useEffect(()=>{
+        if(!tags){
+            if(tagCopy){
+                setTagCopy(undefined);
+            }
+        }else if(!tagCopy || tags.length!==tagCopy?.length){
+            setTagCopy(tags);
+        }else{
+            for(let i=0;i<tags.length;i++){
+                if(tags[i]!==tagCopy[i]){
+                    setTagCopy(tags);
+                    break;
+                }
+            }
+        }
+    },[tags,tagCopy]);
+
+
+    return tagCopy;
+
+
 }

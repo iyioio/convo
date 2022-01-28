@@ -1,6 +1,16 @@
 import { ConvoNoId, ConvoProvider, MessageNoId } from "./convo-provider-types";
 import { Convo, ConvoInfo, DateTimeValue, ItemPointer, ListPointer, Member, Message, SendMessageRequest, StartConvoRequest } from "./convo-types";
 
+function sortTags(tags:string[]|undefined):string[]|undefined
+{
+    if(!tags){
+        return undefined;
+    }
+    tags=[...tags];
+    tags.sort((a,b)=>a.localeCompare(b));
+    return tags;
+}
+
 export class ConvoMgr
 {
 
@@ -13,7 +23,7 @@ export class ConvoMgr
 
     public async getConversationsAsync(userId:string, tags?:string[]): Promise<ConvoInfo[]>
     {
-        return await this.provider.getConversationsAsync(userId,tags||null);
+        return await this.provider.getConversationsAsync(userId,sortTags(tags)||null);
     }
 
     public async getConversationAsync(convoId:string): Promise<Convo|null>
@@ -28,7 +38,7 @@ export class ConvoMgr
 
     public getConversationListPointer(userId:string, tags?:string[]): ListPointer<Convo>
     {
-        return this.provider.getConversationListPointer(userId,tags||null);
+        return this.provider.getConversationListPointer(userId,sortTags(tags)||null);
     }
 
     public getConversationPointer(convoId:string, userId:string): ItemPointer<Convo>
@@ -58,7 +68,12 @@ export class ConvoMgr
     public async startConversationAsync(request:StartConvoRequest):Promise<Convo>
     {
         
-        const members=request.members?[...request.members]:[];
+        const members=request.members?request.members.map(m=>(
+            {
+                ...m,
+                tags:sortTags(m.tags)
+            }
+        )):[];
 
         const now=Date.now();
 
@@ -75,7 +90,7 @@ export class ConvoMgr
             created:now,
             members,
             memberIds,
-            tags:request.tags
+            tags:sortTags(request.tags)
         }
         
         return await this.provider.startConversationAsync(convoNoId,request.name?false:true);
@@ -124,13 +139,13 @@ export class ConvoMgr
             contentThumbnailUrl:request.contentThumbnailUrl,
             contentData:request.contentData,
             notify:notify,
-            tags:request.tags,
+            tags:sortTags(request.tags),
             read
         };
         return await this.provider.sendMessageAsync(messageNoId);
     }
 
-    public async getConversationForMembersAsync(memberIds:string[],primaryUserId?:string): Promise<Convo|null>
+    public async getConversationForMembersAsync(memberIds:string[],primaryUserId?:string,tags?:string[]): Promise<Convo|null>
     {
         if(!memberIds?.length){
             return null;
@@ -140,7 +155,7 @@ export class ConvoMgr
             memberIds.push(primaryUserId);
         }
         memberIds.sort((a,b)=>a.localeCompare(b));
-        return await this.provider.getConversationForMembersAsync(memberIds);
+        return await this.provider.getConversationForMembersAsync(memberIds,sortTags(tags)||null);
     }
 
     public async markMessageAsReadAsync(convoId:string, messageId:string, userId:string): Promise<void>

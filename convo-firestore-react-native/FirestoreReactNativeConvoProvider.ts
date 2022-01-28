@@ -49,7 +49,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
             .where('memberIds','array-contains',userId);
 
         if(tags){
-            query=query.where('tags','array-contains-any',tags);
+            query=query.where('tags','==',tags);
         }
 
         return (await query
@@ -139,7 +139,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
                     .where('memberIds','array-contains',userId);
 
                 if(tags){
-                    query=query.where('tags','array-contains-any',tags);
+                    query=query.where('tags','==',tags);
                 }
 
                 query=query.orderBy('lastChanged','desc');
@@ -185,17 +185,20 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
             
     }
 
-    public async getConversationForMembersAsync(memberIds: string[]): Promise<Convo | null>
+    public async getConversationForMembersAsync(memberIds: string[], tags:string[]|null): Promise<Convo | null>
     {
 
         if(!memberIds?.length){
             return null;
         }
 
-        const convoDocs=await this.conversations
-            .where('memberIds','==',memberIds)
-            .limit(1)
-            .get();
+        let query=this.conversations.where('memberIds','==',memberIds);
+
+        if(tags){
+            query=query.where('tags','==',tags);
+        }
+
+        const convoDocs=await query.limit(1).get();
 
         return convoDocs.size?convoDocs.docs[0].data() as Convo:null;
     }
