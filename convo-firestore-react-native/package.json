@@ -1,6 +1,6 @@
 {
   "name": "@iyio/convo-firestore-react-native",
-  "version": "0.5.0",
+  "version": "0.6.1",
   "description": "",
   "main": "dist/convo-firestore-react-native-index.js",
   "types": "dist/convo-firestore-react-native-index.d.ts",
@@ -25,7 +25,7 @@
     "@react-native-firebase/app": "^12.0.0"
   },
   "dependencies": {
-    "@iyio/convo": "0.5.0",
+    "@iyio/convo": "^0.6.1",
     "@iyio/named-events": "^1.5.0"
   }
 }
