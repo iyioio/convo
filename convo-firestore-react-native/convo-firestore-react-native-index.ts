@@ -1,1 +1,1 @@
-export * from './FirestoreReactNativeConvoProvider';
+export * from './FirestoreReactNativeConvoClientAdapter';

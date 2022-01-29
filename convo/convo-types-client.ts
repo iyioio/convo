@@ -1,12 +1,12 @@
-import type { Convo, ConvoInfo, DateTimeValue, ItemPointer, ListPointer, Member, Message } from "./convo-types";
+import type { Convo, ConvoInfo, ConvoNoId, DateTimeValue, ItemPointer, ListPointer, Member, Message, MessageNoId } from "./convo-types";
 
-
-export type ConvoNoId=Omit<Convo,'id'>;
-
-export type MessageNoId=Omit<Message,'id'>;
-
-export interface ConvoProvider
+export interface ConvoClientAdapter
 {
+
+    /**
+     * Sends a message in a conversation
+     */
+    sendMessageAsync(messageNoId:MessageNoId): Promise<Message>;
 
     /**
      * Starts a new conversation with the given users
@@ -33,11 +33,6 @@ export interface ConvoProvider
      * Returns a conversation by id
      */
     getConversationAsync(convoId:string): Promise<Convo|null>;
-
-    /**
-     * Sends a message in a conversation
-     */
-    sendMessageAsync(messageNoId:MessageNoId): Promise<Message>;
 
 
     /**

@@ -1,3 +1,7 @@
+export * from './common';
 export * from './convo-types';
-export * from './convo-provider-types';
-export * from './ConvoMgr';
+export * from './convo-types-client';
+export * from './convo-types-service';
+export * from './ConvoClient';
+export * from './ConvoServiceMgr';
+

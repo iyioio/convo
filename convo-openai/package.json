@@ -19,5 +19,8 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@iyio/convo": "^0.7.0"
   }
 }

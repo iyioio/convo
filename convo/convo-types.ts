@@ -118,10 +118,13 @@ export interface Message
     receiverId?:string;
 
     /**
-     * If true messages should included in service processing. For example the message could be
-     * sent to a bot.
+     * Controls what services the message should be processed by.
+     *
+     * Values:
+     * - undefined | empty   The message will be processed by services that do not define tags
+     * - string[]            The message will be processed by services with any matching tags
      */
-    includeServices?:boolean;
+    serviceTags?:string[];
 
     senderName?:string;
 
@@ -150,7 +153,7 @@ export interface Message
     read?:{[memberId:string]:boolean}
 
     tags?:string[];
-    
+
     data?:{[key:string]:string}
 
 }
@@ -163,7 +166,14 @@ export interface SendMessageRequest
 
     receiverId?:string;
     
-    includeServices?:boolean;
+    /**
+     * Controls what services the message should be processed by.
+     *
+     * Values:
+     * - undefined | empty   The message will be processed by services that do not define tags
+     * - string[]            The message will be processed by services with any matching tags
+     */
+    serviceTags?:string[];
 
     senderName?:string;
 
@@ -293,3 +303,7 @@ export interface ListPointer<T>
     dispose():void;
 
 }
+
+export type ConvoNoId=Omit<Convo,'id'>;
+
+export type MessageNoId=Omit<Message,'id'>;

@@ -1,24 +1,23 @@
-import { ConvoNoId, ConvoProvider, MessageNoId } from "./convo-provider-types";
-import { Convo, ConvoInfo, DateTimeValue, ItemPointer, ListPointer, Member, Message, SendMessageRequest, StartConvoRequest } from "./convo-types";
+import { convertRequestToMessage, sortTags } from "./common";
+import { Convo, ConvoInfo, ConvoNoId, DateTimeValue, ItemPointer, ListPointer, Member, Message, SendMessageRequest, StartConvoRequest } from "./convo-types";
+import { ConvoClientAdapter } from "./convo-types-client";
 
-function sortTags(tags:string[]|undefined):string[]|undefined
-{
-    if(!tags){
-        return undefined;
-    }
-    tags=[...tags];
-    tags.sort((a,b)=>a.localeCompare(b));
-    return tags;
-}
-
-export class ConvoMgr
+export class ConvoClient
 {
 
-    private readonly provider:ConvoProvider;
+    private readonly provider:ConvoClientAdapter;
 
-    public constructor(provider:ConvoProvider)
+    public constructor(provider:ConvoClientAdapter)
     {
         this.provider=provider;
+    }
+
+    /**
+     * Sends a message in a conversation
+     */
+    public async sendMessageAsync(request:SendMessageRequest):Promise<Message>
+    {
+        return await this.provider.sendMessageAsync(convertRequestToMessage(request));
     }
 
     public async getConversationsAsync(userId:string, tags?:string[]): Promise<ConvoInfo[]>
@@ -94,56 +93,6 @@ export class ConvoMgr
         }
         
         return await this.provider.startConversationAsync(convoNoId,request.name?false:true);
-    }
-
-    /**
-     * Sends a message in a conversation
-     */
-    public async sendMessageAsync(request:SendMessageRequest):Promise<Message>
-    {
-        if(!request.convoId){
-            throw new Error('SendMessageRequest must define a convoId')
-        }
-
-        let notify=request.notify?[...request.notify]:[];
-
-        if(request.senderId){
-            if(request.notifySender){
-                if(!notify.includes(request.senderId)){
-                    notify.push(request.senderId);
-                }
-            }else{
-                if(notify.includes(request.senderId)){
-                    notify=notify.filter(id=>id!==request.senderId);
-                }
-            }
-        }
-
-        const read:{[memberId:string]:boolean}={}
-        for(const n of notify){
-            read[n]=false;
-        }
-
-
-        const messageNoId:MessageNoId={
-            convoId:request.convoId,
-            senderId:request.senderId,
-            senderName:request.senderName,
-            receiverId:request.receiverId,
-            includeServices:request.includeServices,
-            created:request.created===undefined?Date.now():request.created,
-            text:request.text,
-            contentType:request.contentType,
-            content:request.content,
-            contentUri:request.contentUri,
-            contentThumbnailUrl:request.contentThumbnailUrl,
-            contentData:request.contentData,
-            notify:notify,
-            tags:sortTags(request.tags),
-            data:request.data?{...request.data}:undefined,
-            read
-        };
-        return await this.provider.sendMessageAsync(messageNoId);
     }
 
     public async getConversationForMembersAsync(memberIds:string[],primaryUserId?:string,tags?:string[]): Promise<Convo|null>

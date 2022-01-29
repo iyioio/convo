@@ -1,8 +1,8 @@
-import { Convo, ConvoMgr, ItemPointer, ListPointer, Member, Message } from '@iyio/convo';
+import { Convo, ConvoClient, ItemPointer, ListPointer, Member, Message } from '@iyio/convo';
 import { useEffect, useState } from 'react';
 
 export function useConversationList(
-    mgr:ConvoMgr|null|undefined,
+    client:ConvoClient|null|undefined,
     userId:string|null|undefined,
     tags?:string[]|null)
 {
@@ -10,11 +10,11 @@ export function useConversationList(
     const [,render]=useState(0)
     const [pointer,setPointer]=useState<ListPointer<Convo>|null>();
     useEffect(()=>{
-        if(!mgr || !userId){
+        if(!client || !userId){
             setPointer(null);
             return;
         }
-        const pointer=mgr.getConversationListPointer(userId,tags||undefined);
+        const pointer=client.getConversationListPointer(userId,tags||undefined);
         setPointer(pointer);
         pointer.onListChanged(()=>{
             render(v=>v+1);
@@ -22,24 +22,24 @@ export function useConversationList(
         return ()=>{
             pointer.dispose();
         }
-    },[mgr,userId,tags]);
+    },[client,userId,tags]);
 
     return pointer;
 }
 
 export function useConvo(
-    mgr:ConvoMgr|null|undefined,
+    client:ConvoClient|null|undefined,
     convoId:string|null|undefined,
     userId:string|null|undefined)
 {
     const [,render]=useState(0)
     const [pointer,setPointer]=useState<ItemPointer<Convo>|null>();
     useEffect(()=>{
-        if(!mgr || !convoId || !userId){
+        if(!client || !convoId || !userId){
             setPointer(null);
             return;
         }
-        const pointer=mgr.getConversationPointer(convoId,userId);
+        const pointer=client.getConversationPointer(convoId,userId);
         setPointer(pointer);
         pointer.onItemChanged(()=>{
             render(v=>v+1);
@@ -47,24 +47,24 @@ export function useConvo(
         return ()=>{
             pointer.dispose();
         }
-    },[convoId,mgr,userId]);
+    },[convoId,client,userId]);
 
     return pointer;
 }
 
 export function useMessageList(
-    mgr:ConvoMgr|null|undefined,
+    client:ConvoClient|null|undefined,
     convoId:string|null|undefined,
     userId:string|null|undefined)
 {
     const [,render]=useState(0)
     const [pointer,setPointer]=useState<ListPointer<Message>|null>();
     useEffect(()=>{
-        if(!mgr || !convoId || !userId){
+        if(!client || !convoId || !userId){
             setPointer(null);
             return;
         }
-        const pointer=mgr.getMessageListPointer(convoId,userId);
+        const pointer=client.getMessageListPointer(convoId,userId);
         setPointer(pointer);
         pointer.onListChanged(()=>{
             render(v=>v+1);
@@ -72,23 +72,23 @@ export function useMessageList(
         return ()=>{
             pointer.dispose();
         }
-    },[convoId,mgr,userId]);
+    },[convoId,client,userId]);
 
     return pointer;
 }
 
 export function useUnreadMessageList(
-    mgr:ConvoMgr|null|undefined,
+    client:ConvoClient|null|undefined,
     userId:string|null|undefined)
 {
     const [,render]=useState(0)
     const [pointer,setPointer]=useState<ListPointer<Message>|null>();
     useEffect(()=>{
-        if(!mgr || !userId){
+        if(!client || !userId){
             setPointer(null);
             return;
         }
-        const pointer=mgr.getUnreadMessagesPointer(userId);
+        const pointer=client.getUnreadMessagesPointer(userId);
         setPointer(pointer);
         pointer.onListChanged(()=>{
             render(v=>v+1);
@@ -96,36 +96,36 @@ export function useUnreadMessageList(
         return ()=>{
             pointer.dispose();
         }
-    },[mgr,userId]);
+    },[client,userId]);
 
     return pointer;
 }
 
 export function useKnownConvoMembers(
-    mgr:ConvoMgr|null|undefined,
+    client:ConvoClient|null|undefined,
     userId:string|null|undefined)
 {
     const [members,setMembers]=useState<Member[]|null>(null);
 
     useEffect(()=>{
-        if(!mgr || !userId){
+        if(!client || !userId){
             return;
         }
         let m=true;
         (async ()=>{
-            const members=await mgr.getKnownMembersAsync(userId);
+            const members=await client.getKnownMembersAsync(userId);
             if(m){
                 setMembers(members);
             }
         })()
         return ()=>{m=false};
-    },[mgr,userId]);
+    },[client,userId]);
 
     return members;
 }
 
 export function useConversationForMembers(
-    mgr:ConvoMgr|null|undefined,
+    client:ConvoClient|null|undefined,
     memberIds:string[]|null|undefined,
     additionalUserId?:string|null,
     tags?:string[])
@@ -135,18 +135,18 @@ export function useConversationForMembers(
     tags=useTagList(tags);
 
     useEffect(()=>{
-        if(!mgr || !memberIds?.length){
+        if(!client || !memberIds?.length){
             return;
         }
         let m=true;
         (async ()=>{
-            const convo=await mgr.getConversationForMembersAsync(memberIds,additionalUserId||undefined,tags||undefined);
+            const convo=await client.getConversationForMembersAsync(memberIds,additionalUserId||undefined,tags||undefined);
             if(m){
                 setConvo(convo);
             }
         })()
         return ()=>{m=false};
-    },[mgr,memberIds,additionalUserId,tags]);
+    },[client,memberIds,additionalUserId,tags]);
 
     return convo;
 }

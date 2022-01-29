@@ -1,21 +1,21 @@
-import { ItemPointer, ListPointer, Member } from '@iyio/convo';
+import { cloneObjSkipUndefined, Convo, ConvoClientAdapter, ConvoInfo, ConvoNoId, DateTimeValue, ItemPointer, ListPointer, Member, Message, MessageNoId, newId } from '@iyio/convo';
 import firestore from '@react-native-firebase/firestore';
-import { Convo, ConvoInfo, ConvoNoId, ConvoProvider, DateTimeValue, Message, MessageNoId } from 'convo/dist/convo-index';
-import { cloneObjSkipUndefined, createItemPointer, createListPointer, getQueryCountAsync, newId } from './util';
+import { createItemPointer, createListPointer, getQueryCountAsync } from './util';
 
-export const defaultConvoCollection='conversations'
-
-export interface FirestoreReactNativeConvoProviderOptions
+export interface FirestoreReactNativeConvoClientAdapterOptions
 {
-    convoCollection?:string;
+    convoCollection:string;
+    messagesSubCollectionName?:string;
     emulatorAddress?:string;
     emulatorPort?:number;
 }
 
-export class FirestoreReactNativeConvoProvider implements ConvoProvider
+export class FirestoreReactNativeConvoClientAdapter implements ConvoClientAdapter
 {
     // name of the collection to store conversations in
     private readonly cn:string;
+
+    private readonly msgCn:string;
 
     private readonly emulatorAddress?:string;
     private readonly emulatorPort:number;
@@ -25,19 +25,20 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
         if(this.emulatorAddress){
             db.useEmulator(this.emulatorAddress,this.emulatorPort);
         }
-        //db.settings({host:'192.168.77.159:8199'})
         return db;    
     }
 
     private get conversations(){return this.db.collection(this.cn)}
 
     public constructor({
-        convoCollection=defaultConvoCollection,
+        convoCollection,
+        messagesSubCollectionName='messages',
         emulatorAddress,
         emulatorPort=8080
 
-    }:FirestoreReactNativeConvoProviderOptions){
+    }:FirestoreReactNativeConvoClientAdapterOptions){
         this.cn=convoCollection;
+        this.msgCn=messagesSubCollectionName;
         this.emulatorAddress=emulatorAddress;
         this.emulatorPort=emulatorPort
     }
@@ -63,7 +64,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
     {
         const messages=await this.conversations
             .doc(convoId)
-            .collection('messages')
+            .collection(this.msgCn)
             .orderBy('created','desc')
             .where('created','<=',startDate)
             .limit(count)
@@ -106,7 +107,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
             lastMessage:msg,
         };
     
-        batch.set(this.conversations.doc(msg.convoId).collection('messages').doc(msg.id),msg);
+        batch.set(this.conversations.doc(msg.convoId).collection(this.msgCn).doc(msg.id),msg);
         batch.update(this.conversations.doc(msg.convoId),convo);
 
         await batch.commit();
@@ -119,7 +120,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
         return createListPointer<Message>({
             buildQuery:(start,limit)=>{
                 let query=this.conversations
-                    .doc(convoId).collection('messages')
+                    .doc(convoId).collection(this.msgCn)
                     .orderBy('created','desc');
 
                 if(start){
@@ -215,7 +216,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
     {
         return createListPointer<Message>({
             buildQuery:(start,limit)=>{
-                let query=this.db.collectionGroup('messages')
+                let query=this.db.collectionGroup(this.msgCn)
                     .where('notify','array-contains',userId)
                     .where(`read.${userId}`,'==',false)
                     .orderBy('created','desc');
@@ -233,7 +234,7 @@ export class FirestoreReactNativeConvoProvider implements ConvoProvider
     {
         return await getQueryCountAsync(
             'id',
-            this.db.collectionGroup('messages')
+            this.db.collectionGroup(this.msgCn)
                 .where('notify','array-contains',userId)
                 .where(`read.${userId}`,'==',false));
             

@@ -1,12 +1,11 @@
-import { Message, NotificationDevice } from '@iyio/convo';
+import { ConvoService, Message, NotificationDevice, ServiceProcessCtx } from '@iyio/convo';
 import firebase, { messaging } from 'firebase-admin';
-import * as functions from "firebase-functions";
 
 
 export const defaultMessageDocumentPath='conversations/{convoId}/messages/{messageId}';
 export const defaultDevicesCollection='notificationDevices';
 
-export interface SendConvoNotificationsOptions
+export interface FirebaseNotificationServiceConfig
 {
     messageDocumentPath?:string;
     devicesCollection?:string;
@@ -15,78 +14,93 @@ export interface SendConvoNotificationsOptions
     resolveUriAsync?:(uri:string,message:Message,device:NotificationDevice)=>Promise<string|null>;
 }
 
-export function sendConvoNotifications(
-    db:firebase.firestore.Firestore,
-    {
-        messageDocumentPath=defaultMessageDocumentPath,
-        devicesCollection=defaultDevicesCollection,
-        getData,
-        configureMessage,
-        resolveUriAsync
-    }:SendConvoNotificationsOptions)
+export class FirebaseNotificationService implements ConvoService
 {
-    return functions.firestore
-        .document(messageDocumentPath)
-        .onCreate(async (snap,context)=>{
+    public readonly supportsParallelProcessing:boolean=true;
 
-            const message=snap.data() as Message;
+    private readonly db:firebase.firestore.Firestore;
 
-            if(message.notify?.length && (message.text || message.contentThumbnailUrl)){
+    public readonly tags:string[]=[];
 
-                const devices=await db.collection(devicesCollection)
-                    .where('userId','in',message.notify)
-                    .get();
+    private readonly config:FirebaseNotificationServiceConfig;
 
-                if(!devices.size){
-                    return;
-                }
+    public constructor(
+        db:firebase.firestore.Firestore,
+        config:FirebaseNotificationServiceConfig)
+    {
+        this.db=db;
+        this.config=config;
+    }
 
-                const sentTo:{[id:string]:true}={};
+    public async processMessageAsync({
+        message,
+        mgr,
+    }: ServiceProcessCtx): Promise<void>
+    {
+        if(message.notify?.length && (message.text || message.contentThumbnailUrl)){
 
-                await Promise.all(devices.docs.map(async (d)=>{
-                    
-                    try{
-                        const device=d.data() as NotificationDevice;
+            const {
+                //messageDocumentPath=defaultMessageDocumentPath,
+                devicesCollection=defaultDevicesCollection,
+                getData,
+                configureMessage,
+                resolveUriAsync,
+            }=this.config;
 
-                        if(sentTo[device.deviceId]){
-                            return;
-                        }
-                        sentTo[device.deviceId]=true;
+            const devices=await this.db.collection(devicesCollection)
+                .where('userId','in',message.notify)
+                .get();
 
-                        if(device.deviceId){
-                            
-                            let uri=message.contentThumbnailUrl;
-                            if(uri && resolveUriAsync){
-                                uri=(await resolveUriAsync(uri,message,device))||undefined;
-                            }
-
-                            const msg:messaging.TokenMessage={
-                                token:device.deviceId,
-                                notification:{
-                                    title:message.senderName?`Message from ${message.senderName}`:'New Message',
-                                    body:message.text,
-                                    imageUrl:uri
-                                }
-                            }
-                            const data=getData?.(message,device);
-                            if(data){
-                                msg.data=data;
-                            }
-                            if(message.data){
-                                if(!msg.data){
-                                    msg.data={}
-                                }
-                                for(const e in message.data){
-                                    msg.data[e]=message.data[e];
-                                }
-                            }
-                            configureMessage?.(msg);
-                            await firebase.messaging().send(msg);
-                        }
-                    }catch(ex:any){
-                        console.error(`error sending notification to device. device:${d.id}, message:${message.id}`)
-                    }
-                }))
+            if(!devices.size){
+                return;
             }
-        })
+
+            const sentTo:{[id:string]:true}={};
+
+            await Promise.all(devices.docs.map(async (d)=>{
+                
+                try{
+                    const device=d.data() as NotificationDevice;
+
+                    if(sentTo[device.deviceId]){
+                        return;
+                    }
+                    sentTo[device.deviceId]=true;
+
+                    if(device.deviceId){
+                        
+                        let uri=message.contentThumbnailUrl;
+                        if(uri && resolveUriAsync){
+                            uri=(await resolveUriAsync(uri,message,device))||undefined;
+                        }
+
+                        const msg:messaging.TokenMessage={
+                            token:device.deviceId,
+                            notification:{
+                                title:message.senderName?`Message from ${message.senderName}`:'New Message',
+                                body:message.text,
+                                imageUrl:uri
+                            }
+                        }
+                        const data=getData?.(message,device);
+                        if(data){
+                            msg.data=data;
+                        }
+                        if(message.data){
+                            if(!msg.data){
+                                msg.data={}
+                            }
+                            for(const e in message.data){
+                                msg.data[e]=message.data[e];
+                            }
+                        }
+                        configureMessage?.(msg);
+                        await firebase.messaging().send(msg);
+                    }
+                }catch(ex:any){
+                    console.error(`error sending notification to device. device:${d.id}, message:${message.id}`)
+                }
+            }))
+        }
+    }
 }

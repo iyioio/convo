@@ -1,9 +1,9 @@
 {
-  "name": "@iyio/convo-firebase-notifications",
-  "version": "0.7.0",
-  "description": "Sends notifications for firestore conversations",
-  "main": "dist/convo-firebase-notifications-index.js",
-  "types": "dist/convo-firebase-notifications-index.d.ts",
+  "name": "@iyio/convo-firestore-adapter",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/convo-firestore-adapter-index.js",
+  "types": "dist/convo-firestore-adapter-index.d.ts",
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "directory": "convo-firebase-notifications/",
+    "directory": "firestore-adapter/",
     "url": "https://github.com/iyioio/convo.git"
   },
   "keywords": [],
