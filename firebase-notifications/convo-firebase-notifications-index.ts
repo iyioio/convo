@@ -16,6 +16,8 @@ export interface FirebaseNotificationServiceConfig
 
 export class FirebaseNotificationService implements ConvoService
 {
+    public readonly name:string="FirebaseNotificationService"
+
     public readonly supportsParallelProcessing:boolean=true;
 
     private readonly db:firebase.firestore.Firestore;

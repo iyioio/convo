@@ -21,6 +21,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@iyio/convo": "^0.7.0"
+    "@iyio/convo": "^0.7.0",
+    "openai": "^2.0.2"
   }
 }

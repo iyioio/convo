@@ -121,8 +121,9 @@ export interface Message
      * Controls what services the message should be processed by.
      *
      * Values:
-     * - undefined | empty   The message will be processed by services that do not define tags
+     * - undefined           The message will be processed by services that do not define tags
      * - string[]            The message will be processed by services with any matching tags
+     * - empty array         The message will not be processed by any services
      */
     serviceTags?:string[];
 
@@ -170,8 +171,9 @@ export interface SendMessageRequest
      * Controls what services the message should be processed by.
      *
      * Values:
-     * - undefined | empty   The message will be processed by services that do not define tags
+     * - undefined           The message will be processed by services that do not define tags
      * - string[]            The message will be processed by services with any matching tags
+     * - empty array         The message will not be processed by any services
      */
     serviceTags?:string[];
 
@@ -307,3 +309,45 @@ export interface ListPointer<T>
 export type ConvoNoId=Omit<Convo,'id'>;
 
 export type MessageNoId=Omit<Message,'id'>;
+
+export interface FuncCallCtx
+{
+    convoId:string;
+    func:ConvoFunc;
+}
+
+export type ConvoFuncCallback=(ctx:FuncCallCtx,...args:any[])=>Promise<any>|void;
+
+/**
+ * Represents a function that can be called in a conversation
+ */
+export interface ConvoFunc
+{
+    name:string;
+    args?:ConvoFuncArg[];
+    callback:ConvoFuncCallback;
+}
+
+export interface ParsedConvoFunc
+{
+    name:string;
+    args:ConvoFuncArgType[];
+    argValues:any[];
+}
+
+export type ConvoFuncArgType=(
+    'string'|
+    'number'|
+    'boolean'|
+    'null'|
+    'undefined'|
+    'string[]'|
+    'number[]'|
+    'boolean[]'
+)
+
+export interface ConvoFuncArg
+{
+    name:string;
+    type:ConvoFuncArgType;
+}
