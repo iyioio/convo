@@ -2,20 +2,20 @@
     "packages":[
         {"path":"convo"},
         {"path":"firestore-adapter"},
-        {"path":"convo-firebase-notifications"},
-        {"path":"convo-firestore-react-native"},
-        {"path":"convo-react"},
-        {"path":"convo-openai"}
+        {"path":"firebase-notifications"},
+        {"path":"firestore-react-native"},
+        {"path":"react"},
+        {"path":"openai"}
     ],
 
     "scopes":[
         {
             "targets":[
                 "firestore-adapter",
-                "convo-firestore-react-native",
-                "convo-firebase-notifications",
-                "convo-react",
-                "convo-openai"
+                "firestore-react-native",
+                "firebase-notifications",
+                "react",
+                "openai"
             ],
             "use":[
                 "@iyio/convo"
