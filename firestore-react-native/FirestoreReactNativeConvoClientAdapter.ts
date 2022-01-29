@@ -102,7 +102,9 @@ export class FirestoreReactNativeConvoClientAdapter implements ConvoClientAdapte
         });
 
 
-        const batch=this.db.batch();const convo:Partial<Convo>={
+        const batch=this.db.batch();
+
+        const convo:Partial<Convo>={
             lastChanged:Date.now(),
             lastMessage:msg,
         };
