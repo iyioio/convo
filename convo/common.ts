@@ -5,7 +5,7 @@ export const tagBot='bot';
 export function isServiceMatch(serviceTags:string[], messageTags:string[]|undefined)
 {
     if(!Array.isArray(messageTags)){
-        return false;
+        messageTags=undefined;
     }
 
     if(!serviceTags.length){
