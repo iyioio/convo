@@ -1,10 +1,11 @@
-import { cloneObjSkipUndefined, Convo, ConvoServiceAdapter, Message, MessageNoId, newId } from "@iyio/convo";
+import { cloneObjSkipUndefined, Convo, ConvoServiceAdapter, MemberData, Message, MessageNoId, newId } from "@iyio/convo";
 import { firestore } from 'firebase-admin';
 
 export interface FirestoreConvoServiceAdapterOptions
 {
     convoCollection:string;
     messagesSubCollectionName?:string;
+    memberDataCollection?:string;
 }
 
 export class FirestoreConvoServiceAdapter implements ConvoServiceAdapter
@@ -14,18 +15,28 @@ export class FirestoreConvoServiceAdapter implements ConvoServiceAdapter
 
     private readonly msgCn:string;
 
+    private readonly memberDataCollection:string;
+
     private db:firestore.Firestore;
 
     private get conversations(){return this.db.collection(this.cn)}
 
     public constructor(db:firestore.Firestore,{
         convoCollection,
-        messagesSubCollectionName='messages'
+        messagesSubCollectionName='messages',
+        memberDataCollection='convoMemberData'
 
     }:FirestoreConvoServiceAdapterOptions){
         this.db=db;
         this.cn=convoCollection;
         this.msgCn=messagesSubCollectionName;
+        this.memberDataCollection=memberDataCollection;
+    }
+
+    public async getMemberDataAsync(memberId:string): Promise<MemberData|null>
+    {
+        const doc=await this.db.doc(`${this.memberDataCollection}/${memberId}`).get();
+        return doc.exists?doc.data() as MemberData:null;
     }
 
     public async sendMessageAsync(messageNoId:MessageNoId):Promise<Message>
@@ -36,7 +47,9 @@ export class FirestoreConvoServiceAdapter implements ConvoServiceAdapter
         });
 
 
-        const batch=this.db.batch();const convo:Partial<Convo>={
+        const batch=this.db.batch();
+        
+        const convo:Partial<Convo>={
             lastChanged:Date.now(),
             lastMessage:msg,
         };
