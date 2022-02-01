@@ -1,6 +1,6 @@
 {
   "name": "@iyio/convo",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "",
   "main": "dist/convo-index.js",
   "types": "dist/convo-index.d.ts",
