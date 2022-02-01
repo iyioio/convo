@@ -164,9 +164,9 @@ export interface Message
     notify?:string[];
 
     /**
-     * A lookup of users that have read the message
+     * Array of user ids of users that have not read the message
      */
-    read?:{[memberId:string]:boolean}
+    unread?:string[];
 
     tags?:string[];
 

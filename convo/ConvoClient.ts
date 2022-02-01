@@ -117,7 +117,7 @@ export class ConvoClient
     {
         const unread:Message[]=[];
         for(const m of messages){
-            if(m.read?.[userId]===false){
+            if(m.unread?.includes(userId)){
                 unread.push(m);
             }
         }

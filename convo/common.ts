@@ -45,11 +45,6 @@ export function convertRequestToMessage(request:SendMessageRequest):MessageNoId
         }
     }
 
-    const read:{[memberId:string]:boolean}={}
-    for(const n of notify){
-        read[n]=false;
-    }
-
 
     return {
         convoId:request.convoId,
@@ -66,9 +61,9 @@ export function convertRequestToMessage(request:SendMessageRequest):MessageNoId
         contentData:request.contentData,
         contentDataType:request.contentDataType,
         notify:notify,
+        unread:notify,
         tags:sortTags(request.tags),
         data:request.data?{...request.data}:undefined,
-        read
     };
 }
 

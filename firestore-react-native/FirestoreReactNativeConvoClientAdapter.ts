@@ -208,10 +208,10 @@ export class FirestoreReactNativeConvoClientAdapter implements ConvoClientAdapte
 
     public async markMessageAsReadAsync(convoId:string, messageId:string, userId:string): Promise<void>
     {
-        const msg:Partial<Message>={
-            read:{[userId]:true}
-        }
-        await this.db.doc(`${this.cn}/${convoId}/messages/${messageId}`).update(msg);
+        await this.db
+            .doc(`${this.cn}/${convoId}/messages/${messageId}`)
+            .update({unread:firestore.FieldValue.arrayRemove(userId)});
+
     }
 
     public getUnreadMessagesPointer(userId:string): ListPointer<Message>
@@ -219,8 +219,7 @@ export class FirestoreReactNativeConvoClientAdapter implements ConvoClientAdapte
         return createListPointer<Message>({
             buildQuery:(start,limit)=>{
                 let query=this.db.collectionGroup(this.msgCn)
-                    .where('notify','array-contains',userId)
-                    .where(`read.${userId}`,'==',false)
+                    .where('unread','array-contains',userId)
                     .orderBy('created','desc');
 
                 if(start){
@@ -237,8 +236,7 @@ export class FirestoreReactNativeConvoClientAdapter implements ConvoClientAdapte
         return await getQueryCountAsync(
             'id',
             this.db.collectionGroup(this.msgCn)
-                .where('notify','array-contains',userId)
-                .where(`read.${userId}`,'==',false));
+                .where('unread','array-contains',userId));
             
     }
 }
