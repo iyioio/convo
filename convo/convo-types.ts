@@ -1,4 +1,5 @@
 import { NamedEvent } from "@iyio/named-events";
+import type { ConvoServiceMgr } from "./ConvoServiceMgr";
 
 export type DateTimeValue=number;
 
@@ -84,6 +85,11 @@ export interface Member
     name?:string;
 
     /**
+     * Image URI
+     */
+    image?:string;
+
+    /**
      * A service that manages the member. For example the service could be a identifier for a bot
      */
     service?:string;
@@ -101,7 +107,14 @@ export interface Member
     tags?:string[];
 }
 
-export type ContentType='image'|'video'|'lottie'|'other';
+export interface MemberData
+{
+    id:string;
+    name?:string;
+    [key:string]:any;
+}
+
+export type ContentType='image'|'video'|'data'|'other';
 
 export interface Message
 {
@@ -140,6 +153,8 @@ export interface Message
     contentUri?:string;
 
     contentThumbnailUrl?:string;
+
+    contentDataType?:string;
 
     contentData?:any;
 
@@ -192,6 +207,8 @@ export interface SendMessageRequest
     contentThumbnailUrl?:string;
 
     contentData?:any;
+
+    contentDataType?:string;
 
     /**
      * Array of user ids of users to notify of the message
@@ -312,8 +329,31 @@ export type MessageNoId=Omit<Message,'id'>;
 
 export interface FuncCallCtx
 {
-    convoId:string;
+
+    /**
+     * The function being called
+     */
     func:ConvoFunc;
+    
+    /**
+     * The id of the conversation the function was called on behalf of
+     */
+    convoId?:string;
+
+    /**
+     * The message the function was call on behalf of
+     */
+    message?:Message;
+
+    /**
+     * Id of the member the function is being called as
+     */
+    memberId?:string;
+
+    /**
+     * The manager calling the function
+     */
+    mgr?:ConvoServiceMgr;
 }
 
 export type ConvoFuncCallback=(ctx:FuncCallCtx,...args:any[])=>Promise<any>|void;

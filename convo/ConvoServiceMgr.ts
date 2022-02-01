@@ -1,5 +1,5 @@
 import { cloneDeleteUndefinedShallow, convertRequestToMessage, getFuncMatch, isServiceMatch, parseFunc } from "./common";
-import { ConvoFunc, FuncCallCtx, Message, SendMessageRequest } from "./convo-types";
+import type { ConvoFunc, FuncCallCtx, MemberData, Message, SendMessageRequest } from "./convo-types";
 import { ConvoService, ConvoServiceAdapter, ConvoServiceMgrConfig, defaultFunctionSeparator, defaultSenderLabelReg, ProcessTextOptions, ServiceProcessCtx, ServiceProcessResult } from "./convo-types-service";
 
 export class ConvoServiceMgr
@@ -39,9 +39,12 @@ export class ConvoServiceMgr
         }
     }
 
+    public getMemberDataAsync(memberId:string): Promise<MemberData|null>
+    {
+        return this.adapter.getMemberDataAsync(memberId);
+    }
 
-
-    public async callTextFuncAsync(convoId:string, funcText:string):Promise<any>
+    public async callTextFuncAsync(convoId:string|null, message:Message|null, funcText:string):Promise<any>
     {
         const parsed=parseFunc(funcText);
         if(!parsed){
@@ -54,8 +57,11 @@ export class ConvoServiceMgr
         }
 
         const ctx:FuncCallCtx={
-            convoId,
-            func
+            convoId:convoId||undefined,
+            message:message||undefined,
+            memberId:message?.receiverId,
+            func,
+            mgr:this
         };
 
         let r=func.callback(ctx,...parsed.argValues);
@@ -65,7 +71,7 @@ export class ConvoServiceMgr
         return r;
     }
 
-    public async processTextAsync(text:string,convoId:string,{
+    public async processTextAsync(text:string,convoId:string,message:Message|null,{
         invokeFunctions,
         sendBodyAsMessage,
         sendMessageDefaults,
@@ -88,7 +94,7 @@ export class ConvoServiceMgr
                 text:body,
                 convoId,
                 senderName:senderLabel||undefined,
-                senderId:senderLabel?'labeled-'+senderLabel:undefined,
+                senderId:message?.receiverId||senderLabel?'labeled-'+senderLabel:undefined,
                 ...(cloneDeleteUndefinedShallow(sendMessageDefaults)||{}),
                 ...(((senderLabel && getRequestDefaultsForLabelAsync)?cloneDeleteUndefinedShallow(getRequestDefaultsForLabelAsync(senderLabel)):null)||{})                
             }
@@ -99,7 +105,7 @@ export class ConvoServiceMgr
             // call functions
             for(const func of functions){
                 try{
-                    await this.callTextFuncAsync(convoId,func);
+                    await this.callTextFuncAsync(convoId,message,func);
                 }catch(ex:any){
                     console.error(`Error calling func - ${func}`,ex);
                     break;

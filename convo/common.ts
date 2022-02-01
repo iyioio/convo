@@ -1,4 +1,4 @@
-import { ConvoFunc, ConvoFuncArgType, ParsedConvoFunc, SendMessageRequest } from "./convo-types";
+import { ConvoFunc, ConvoFuncArgType, MessageNoId, ParsedConvoFunc, SendMessageRequest } from "./convo-types";
 
 export const tagBot='bot';
 
@@ -25,7 +25,7 @@ export function isServiceMatch(serviceTags:string[], messageTags:string[]|undefi
     return false;
 }
 
-export function convertRequestToMessage(request:SendMessageRequest)
+export function convertRequestToMessage(request:SendMessageRequest):MessageNoId
 {
     if(!request.convoId){
         throw new Error('SendMessageRequest must define a convoId')
@@ -64,6 +64,7 @@ export function convertRequestToMessage(request:SendMessageRequest)
         contentUri:request.contentUri,
         contentThumbnailUrl:request.contentThumbnailUrl,
         contentData:request.contentData,
+        contentDataType:request.contentDataType,
         notify:notify,
         tags:sortTags(request.tags),
         data:request.data?{...request.data}:undefined,

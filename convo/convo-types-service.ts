@@ -1,4 +1,4 @@
-import { ConvoFunc, Message, MessageNoId, SendMessageRequest } from "./convo-types";
+import { ConvoFunc, MemberData, Message, MessageNoId, SendMessageRequest } from "./convo-types";
 import { ConvoServiceMgr } from "./ConvoServiceMgr";
 
 export interface ConvoServiceMgrConfig
@@ -15,6 +15,11 @@ export interface ConvoServiceAdapter
      * Sends a message in a conversation
      */
     sendMessageAsync(messageNoId:MessageNoId): Promise<Message>;
+
+    /**
+     * Returns extended member data for the given member id
+     */
+    getMemberDataAsync(memberId:string): Promise<MemberData|null>;
 }
 
 export interface ServiceProcessResult
