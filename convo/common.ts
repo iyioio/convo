@@ -8,8 +8,12 @@ export function isServiceMatch(serviceTags:string[], messageTags:string[]|undefi
         messageTags=undefined;
     }
 
+    if(messageTags?.length===0){
+        return false;
+    }
+
     if(!serviceTags.length){
-        return messageTags?true:false;
+        return messageTags?.length?false:true;
     }
 
     if(!messageTags){
