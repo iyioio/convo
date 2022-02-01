@@ -1,0 +1,81 @@
+``` json
+{
+    "name":"Keywords",
+    "engine": "text-babbage-001",
+    "conditions":[
+        {
+            "not":true,
+            "match":"\\Wnone\\W",
+            "matchFlags":"i",
+            "sendOutput":"queue",
+            "processTransform":".... keywords([ {{$output}} ])"
+        }
+    ],
+    "completionConfig":{
+        "temperature": 0,
+        "max_tokens": 60,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "stop": ["Message:", "Keywords:"]
+    }
+}
+```
+
+Extract keywords that relate to learning how to speak a new language from the messages below.
+If no keywords are found respond with (none).
+
+Message: My son is learning French
+Keywords: French
+Message: It can be hard to find a tutor that can teach Russian
+Keywords: Russian
+Message: I would like to learn Italian and Hindi
+Keywords: Italian, Hindi
+Message: My grandma can speak German
+Keywords: German
+Message: I think I heard someone speaking Bengali when I was at the coffee shop
+Keywords: Bengali
+Message: I think riding my bike is fun
+Keywords: (none)
+Message: I like eating sushi
+Keywords: (none)
+Message: Can you find my monkey
+Keywords: (none)
+Message: Do you think we really landed on the moon
+Keywords: (none)
+Message: {{$text}}
+Keywords:
+
+
+
+
+``` json
+{
+    "name":"Chat",
+    "engine": "text-curie-001",
+    "inputType": "array",
+    "sendOutput":true,
+    "vars":{
+        "lng1":"French",
+        "lng2":"Spanish"
+    },
+    "completionConfig":{
+        "temperature": 0.5,
+        "max_tokens": 60,
+        "top_p": 1,
+        "frequency_penalty": 0.5,
+        "presence_penalty": 0,
+        "stop": ["Student:"]
+    }
+}
+```
+
+The following is a conversation with a tutor and student. The tutor is very intelligent and  kid 
+friendly and answers questions with facts:
+
+Student: I'm having problems learning {{ $input.0 ?? $lng1 }}
+Tutor: You can do it, {{ $input.0 ?? $lng1 }} can be challenging at times but you can learn it if you try.
+Student: My mom likes speaking {{ $input.+1 ?? $lng2 }} with her friends
+Tutor: {{ $input.+1 ?? $lng2 }} is a widely spoken language
+Student: {{ $text }}
+Tutor:
