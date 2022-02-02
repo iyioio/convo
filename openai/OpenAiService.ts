@@ -1,6 +1,6 @@
 import { ConvoService, ServiceProcessCtx, tagBot } from "@iyio/convo";
 import { Configuration, OpenAIApi } from "openai";
-import { ExecutionConfig, ExecutionCtx, OpenAiServiceConfig, Processor } from "./openai-types";
+import { ExecuteDebugOptions, ExecutionConfig, ExecutionCtx, OpenAiServiceConfig, Processor } from "./openai-types";
 import { executeAsync, executeDebugModeAsync, parseProcessors, sanitizeExecutionConfig } from "./openai-util";
 
 
@@ -61,19 +61,27 @@ export class OpenAiService implements ConvoService
             }
         }
 
+        let debug=(
+            (data['openAiDebug'] as (string|boolean|ExecuteDebugOptions|undefined)) ||
+            this.executionConfig.debug
+        );
+
+        if(typeof debug === 'string'){
+            debug=JSON.parse(debug) as ExecuteDebugOptions;
+        }
+
         const ctx:ExecutionCtx={
-            config:{...this.executionConfig},
+            config:{...this.executionConfig,debug},
             mgr,
             createCompletionAsync:async (engineId, request)=>{
                 return (await this.openai.createCompletion(engineId,request)).data?.choices?.[0].text||null;
             }
-
         };
 
-        if(this.executionConfig.debug){
+        if(debug){
             await executeDebugModeAsync(
                 ctx,message,processors as Processor[],
-                this.executionConfig.debug===true?undefined:this.executionConfig.debug);
+                debug===true?undefined:debug);
         }else{
             await executeAsync(ctx,message,processors as Processor[]);
         }
