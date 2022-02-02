@@ -1,6 +1,6 @@
 {
   "name": "@iyio/convo-openai",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "A Convo bot service using OpenAI GTP-3",
   "main": "dist/convo-openai-index.js",
   "types": "dist/convo-openai-index.d.ts",
@@ -23,7 +23,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@iyio/convo": "^0.8.0",
+    "@iyio/convo": "^0.9.0",
     "openai": "^2.0.2"
   }
 }
