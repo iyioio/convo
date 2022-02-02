@@ -64,7 +64,7 @@ export interface ProcessorCondition
     processTransform?:TextTransformer;
 
     /**
-     * If true and the the ProcessorCondition is true then processing is stopped
+     * If true execution is stopped.
      */
     end?:boolean;
 
@@ -134,6 +134,11 @@ export interface Processor
      * scope
      */
     capturePrevScope?:boolean;
+
+    /**
+     * If true execution is stopped.
+     */
+    end?:boolean;
 }
 
 

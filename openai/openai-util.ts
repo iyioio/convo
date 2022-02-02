@@ -477,7 +477,7 @@ async function executeSingleAsync(
     scope.completion=completion;
     scope.output=completion;
 
-    let result:number|string|false=1;
+    let result:number|string|false=processor.end?false:1;
     let processTransform:TextTransformer|null=null;
 
     if(processor.conditions){
@@ -503,7 +503,7 @@ async function executeSingleAsync(
         result=false;
     }
 
-    if(scope.output && scope.sendOutput && result!==false){
+    if(scope.output && scope.sendOutput){
         let sendOutput=scope.output;
         if(processTransform){
             sendOutput=transformText(sendOutput,processTransform,scope);
