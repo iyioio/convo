@@ -162,6 +162,7 @@ async function testExecuteAsync()
             text: "I want to learn Arabic and Bengali",
           },
           sendOutput: "queue",
+          stepIndex: 0,
           prompt:
             "Extract keywords that relate to learning how to speak a new language from the messages below.\n" +
             "If no keywords are found respond with (none).\n" +
@@ -186,6 +187,7 @@ async function testExecuteAsync()
             "Keywords: (none)\n" +
             "Message: I want to learn Arabic and Bengali\n" +
             "Keywords:",
+          completion: "Arabic, Bengali",
           output: "Arabic, Bengali",
         },
       },
@@ -201,6 +203,7 @@ async function testExecuteAsync()
             text: "I want to learn Arabic and Bengali",
           },
           sendOutput: true,
+          stepIndex: 1,
           prompt:
             "The following is a conversation with a tutor and student. The tutor is very intelligent and  kid \n" +
             "friendly and answers questions with facts:\n" +
@@ -211,6 +214,7 @@ async function testExecuteAsync()
             "Tutor: Bengali is a widely spoken language\n" +
             "Student: I want to learn Arabic and Bengali\n" +
             "Tutor:",
+          completion: "Arabic and Bengali are both widely spoke languages",
           output: "Arabic and Bengali are both widely spoke languages",
           input: ["Arabic", "Bengali"],
           lng1: "French",
@@ -220,8 +224,14 @@ async function testExecuteAsync()
     ]);
 
     assertSame("send values", ctx.sendCaptures, [
-      "Arabic and Bengali are both widely spoke languages",
-      ".... keywords([ Arabic, Bengali ])",
+      {
+        index: 1,
+        output: "Arabic and Bengali are both widely spoke languages",
+      },
+      {
+        index: 0,
+        output: ".... keywords([ Arabic, Bengali ])",
+      },
     ]);
 }
 

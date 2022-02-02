@@ -288,14 +288,6 @@ function applyConfigToScope(scope:Partial<ProcessorScope>,config:ExecuteDebugOpt
             delete scope[e];
         }
     }
-
-    if(config?.deleteLastScopeProps!==false){
-        for(const e in scope){
-            if(e.startsWith('last')){
-                delete scope[e];
-            }
-        }
-    }
 }
 
 export async function executeDebugModeAsync(
@@ -361,6 +353,7 @@ export async function executeDebugModeAsync(
 
 export async function executeAsync(ctx:ExecutionCtx, message:Message, processors:Processor[]):Promise<ProcessorScope>
 {
+    delete ctx.success;
 
     const scope:ProcessorScope={
         text:message.text?.trim()||'',
@@ -372,14 +365,14 @@ export async function executeAsync(ctx:ExecutionCtx, message:Message, processors
 
     ctx.serviceCallCount=0;
 
-    let stepCount=0;
+    let stepIndex=0;
     for(let i=0;i<processors.length;){
-        if(stepCount>=ctx.config.maxSteps){
-            throw new Error(`Max process step count reached. count = ${stepCount}`);
+        if(stepIndex>=ctx.config.maxSteps){
+            throw new Error(`Max process step count reached. count = ${stepIndex}`);
         }
-        stepCount++;
         const processor=processors[i];
-        const result=await executeSingleAsync(ctx,processor,scope,sendQueue);
+        const result=await executeSingleAsync(ctx,processor,stepIndex,scope,sendQueue);
+        stepIndex++;
         if(ctx.scopeCaptures){
             const sourceCapture:CapturedScope={
                 processorName:processor.name,
@@ -411,18 +404,28 @@ export async function executeAsync(ctx:ExecutionCtx, message:Message, processors
         await send();
     }
 
+    ctx.success=true;
+
     return scope;
 }
 
 async function executeSingleAsync(
     ctx:ExecutionCtx,
     processor:Processor,
+    stepIndex:number,
     scope:ProcessorScope,
     sendQueue:(()=>Promise<void>)[])
     :Promise<ProcessResult>
 {
-    scope.lastPrompt=scope.prompt;
+    if(processor.capturePrevScope){
+        scope.prevScope={...scope}
+    }else{
+        delete scope.prevScope;
+    }
     scope.sendOutput=processor.sendOutput;
+    scope.stepIndex=stepIndex;
+
+
 
     if(processor.inputType==='array'){
         scope.input=(scope.output||'')
@@ -471,6 +474,7 @@ async function executeSingleAsync(
         completion='';
     }
     
+    scope.completion=completion;
     scope.output=completion;
 
     let result:number|string|false=1;
@@ -509,9 +513,11 @@ async function executeSingleAsync(
         }
         
         const sendAsync=async ()=>{
-            scope.lastSendOutput=sendOutput;
             if(ctx.sendCaptures){
-                ctx.sendCaptures.push(sendOutput);
+                ctx.sendCaptures.push({
+                    index:stepIndex,
+                    output:sendOutput
+                });
             }
             if(ctx.mgr && ctx.config.responseOptions){
                 await ctx.mgr.processTextAsync(

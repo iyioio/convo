@@ -128,6 +128,12 @@ export interface Processor
     postVars?:ScopeVars;
 
     prompt?:string;
+
+    /**
+     * If true the previous scope will be captured and set as the prevScope property of the current
+     * scope
+     */
+    capturePrevScope?:boolean;
 }
 
 
@@ -193,6 +199,12 @@ export interface OpenAiServiceConfig extends Partial<ExecutionConfig>
 
 export interface ProcessorScope
 {
+
+    /**
+     * The index of the current step
+     */
+    stepIndex?:number;
+
     /**
      * Text received from the user as input
      */
@@ -209,6 +221,11 @@ export interface ProcessorScope
     output?:string;
 
     /**
+     * The current completion
+     */
+    completion?:string;
+
+    /**
      * The output of the last completion
      */
     input?:any;
@@ -218,17 +235,15 @@ export interface ProcessorScope
      */
     sendOutput?:boolean|'queue';
 
-    lastSendOutput?:string;
-
-    /**
-     * The prompt used by the previous process
-     */
-    lastPrompt?:string;
-
     /**
      * The prompt used by the current process
      */
     prompt?:string;
+
+    /**
+     * Set to the previous scope if the current processor's capturePrevScope is true
+     */
+    prevScope?:ProcessorScope;
 
 
     [name:string]:any;
@@ -242,6 +257,12 @@ export interface CapturedScope
     processorName?:string;
     scope:ProcessorScope;
     result:ProcessResult;
+}
+
+export interface SendCapture
+{
+    index:number;
+    output:string;
 }
 
 export interface ExecutionCtx
@@ -270,7 +291,12 @@ export interface ExecutionCtx
     /**
      * If defined send outputs will be captured
      */
-    sendCaptures?:string[];
+    sendCaptures?:SendCapture[];
+
+    /**
+     * Set to true upon a successful execution
+     */
+    success?:boolean;
 }
 
 export interface ExecuteDebugOptions
@@ -282,11 +308,6 @@ export interface ExecuteDebugOptions
      * props to be deleted from each captured scope
      */
     deleteScopeProps?:(keyof ProcessorScope)[];
-
-    /**
-     * If true any captured scope prop start with last will be deleted. Default value = true
-     */
-    deleteLastScopeProps?:boolean;
 
     print?:boolean;
 
