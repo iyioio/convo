@@ -65,7 +65,7 @@ export function convertRequestToMessage(request:SendMessageRequest):MessageNoId
         contentData:request.contentData,
         contentDataType:request.contentDataType,
         notify:notify,
-        unread:notify,
+        unread:request.unread?[...request.unread]:notify,
         tags:sortTags(request.tags),
         data:request.data?{...request.data}:undefined,
     };

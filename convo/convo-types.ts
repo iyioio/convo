@@ -215,6 +215,12 @@ export interface SendMessageRequest
      */
     notify?:string[];
 
+    /**
+     * Array of user ids of users that have not read the message. If not set unread will be set to 
+     * notify
+     */
+    unread?:string[];
+
     notifySender?:boolean;
 
     tags?:string[];
