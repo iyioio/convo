@@ -31,6 +31,11 @@ export interface Convo
     memberIds:string[];
 
     /**
+     * user ids of members that are visible in a conversation
+     */
+    visibleMemberIds:string[];
+
+    /**
      * The last message of the conversation
      */
     lastMessage?:Message;

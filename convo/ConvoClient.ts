@@ -82,6 +82,8 @@ export class ConvoClient
 
         memberIds.sort((a,b)=>a.localeCompare(b));
 
+        const visibleMemberIds=memberIds.filter(id=>members.some(m=>m.id===id && m.isActive));
+
         const convoNoId:ConvoNoId={
             name:request.name||'',
             creatorId:members.find(m=>m.isCreator)?.id,
@@ -89,6 +91,7 @@ export class ConvoClient
             created:now,
             members,
             memberIds,
+            visibleMemberIds,
             tags:sortTags(request.tags)
         }
         

@@ -195,7 +195,7 @@ export class FirestoreReactNativeConvoClientAdapter implements ConvoClientAdapte
             return null;
         }
 
-        let query=this.conversations.where('memberIds','==',memberIds);
+        let query=this.conversations.where('visibleMemberIds','==',memberIds);
 
         if(tags){
             query=query.where('tags','==',tags);
