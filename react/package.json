@@ -1,6 +1,6 @@
 {
   "name": "@iyio/convo-react",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "description": "",
   "main": "dist/convo-react-index.js",
   "types": "dist/convo-react-index.d.ts",
@@ -25,7 +25,7 @@
     "react": "17.0.1"
   },
   "dependencies": {
-    "@iyio/convo": "^0.9.2",
+    "@iyio/convo": "^0.9.5",
     "@iyio/named-events": "^1.5.0"
   }
 }
