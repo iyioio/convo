@@ -2,7 +2,7 @@
 A Conversational Language
 
 ---
-> This project has been moved to convo-lang in the @convo-lang/convo-lang library - https://github.com/convo-lang/convo-lang 
+> ⚠️⚠️⚠️ This project has been moved to convo-lang in the @convo-lang/convo-lang library - https://github.com/convo-lang/convo-lang ⚠️⚠️⚠️
 ---
 
 
